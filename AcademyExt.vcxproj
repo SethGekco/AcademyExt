@@ -32,6 +32,8 @@
     <ClCompile Include="src\Ext\BuildingType\Body.cpp" />
     <ClCompile Include="src\Ext\HouseType\Body.cpp" />
     <ClCompile Include="src\Ext\House\Body.cpp" />
+    <!-- Feature hooks -->
+    <ClCompile Include="src\Hooks.Academy.cpp" />
   </ItemGroup>
 
   <!-- Header files -->

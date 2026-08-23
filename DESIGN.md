@@ -247,12 +247,13 @@ Divergence from Antares here would produce visible inconsistencies:
 ## 8. Phases
 
 1. **Verify `0x4575A2`.** Debugger check of the register/stack hypothesis. This
-   gates the entire spy feature — do it before writing anything else.
-2. **Scaffold.** Repo, YRpp/Syringe submodules, CI (Windows-only build), house +
-   buildingtype + housetype ext with serialization.
-3. **Academy core.** Own academy list (four list hooks) + resolution engine +
-   five apply hooks. Ship `Academy.Stacks`. Testable standalone.
-4. **Country bonus.** `AcademyBonus*` on HouseType, folded in as contributions.
+   gates the spy feature only — deferred, not blocking phases 2–4.
+2. ~~**Scaffold.**~~ **DONE.** Repo, YRpp/Phobos submodules, CI (Windows-only
+   build), house + buildingtype + housetype ext with serialization.
+3. ~~**Academy core.**~~ **DONE.** Own academy list (four list hooks) +
+   resolution engine + five apply hooks. `Academy.Stacks` shipped.
+4. ~~**Country bonus.**~~ **DONE** — landed with the scaffold; `AcademyBonus*`
+   on HouseType is folded in by `ApplyAcademy` as a contribution.
 5. **Spy levels.** `SpyEffect.*.Level` + infiltration recording at `0x4575A2`.
 6. **Encyclopedia contribution.** New Tier-2 page `encyclopedia/Veterancy-Academy.md`
    covering the nine academy addresses, the `0x4571E0` wrapper trap, and the

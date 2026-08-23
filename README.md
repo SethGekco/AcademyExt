@@ -35,9 +35,12 @@ See [docs/INI-REFERENCE.md](docs/INI-REFERENCE.md) for the full tag list and
 
 ## Status
 
-**Scaffold.** The build, the extension data model and the resolution engine are
-in place. Hooks are not yet wired — see the phase list in
-[DESIGN.md](DESIGN.md#8-phases).
+**Academy stacking and the country bonus are implemented and hooked.** Spy
+veterancy levels (`SpyEffect.*Veterancy.Level=`) are parsed and serialized but
+not yet applied — that path is gated on verifying one hook address. See the
+phase list in [DESIGN.md](DESIGN.md#8-phases).
+
+> Not yet verified in-game, and CI has not built it yet.
 
 ## Building
 
