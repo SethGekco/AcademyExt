@@ -112,7 +112,7 @@ Paired with a stacking `0.5` academy, Russian vehicles reach `1.5`.
 ## Spy / infiltration levels — `BuildingType`
 
 > **Phase 5 — parsed but not yet active.** These tags are read and saved, but
-> nothing applies them until the infiltration hook is verified. They are
+> nothing applies them until the infiltration observer hook is wired. They are
 > documented here so the savegame format is stable from the first release.
 
 ```ini

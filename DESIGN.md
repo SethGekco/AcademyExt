@@ -188,29 +188,40 @@ All nine of Antares' handlers `return 0`, so chaining is safe (same pattern the
 encyclopedia records as verified at `0x702050` in `Techno-Instance-Lifecycle.md`).
 AcademyExt's handlers must likewise always `return 0`.
 
-### 5b. The infiltration trap — do **not** hook `0x4571E0`
+### 5b. Infiltration — hook `0x4571E0` directly, and return `0`
 
-Antares' `BuildingClass_Infiltrate` at `0x4571E0` is a **whole-function wrapper**
-that returns `0x4575A2` whenever `BuildingExt::InfiltratedBy` handles the event.
-Syringe stops the chain at the first non-zero return, so a second hook at
-`0x4571E0` **either never runs or fights over EAX**.
+**This section previously said the opposite.** It claimed that because Antares'
+`BuildingClass_Infiltrate` at `0x4571E0` is a whole-function wrapper returning
+`0x4575A2`, a second hook there would be silently dead, and that Phase 5 was
+gated on verifying the jump target `0x4575A2` in a debugger.
 
-This is the same trap the encyclopedia documents for prerequisites at `0x4F7870`
-(`Buildability-Prerequisites.md`), and the documented remedy applies: **hook the
-jump target instead.**
+**That was wrong, and it is now settled by runtime evidence.** Syringe invokes
+*every* registered handler for an address; the first non-zero return decides only
+where control ultimately transfers, not whether later handlers execute. Proof:
+IntelExt registers a handler at `0x4571E0` that returns `0`, and its log line
+appears 8 times across live-game `debug.*.log` history *even though Antares is
+registered first in `wine-game.sh` and returns `0x4575A2`*. Recorded in the
+encyclopedia at `Spy-Infiltration.md` § "VERIFIED — co-hooking `0x4571E0`".
 
 | Address | Purpose | Status |
 |---|---|---|
-| `0x4575A2` | post-infiltration seam; record (house, building) into AcademyExt's own house ext | ⚠ **UNVERIFIED** |
+| `0x4571E0` | record (house, building) into AcademyExt's own house ext | ✅ safe to co-hook |
 
-**Hypothesis to verify first:** because Antares jumps from the function *entry*
-(`0x4571E0`, size `0x5`, before any prologue runs) straight to `0x4575A2`, the
-stack frame should be untouched — so `ECX` = `BuildingClass*` and `[ESP+0x4]` =
-`HouseClass*` should still be live at the target. **Confirm in a debugger before
-building on it.** If it does not hold, fall back to reading the vanilla
-`BarracksInfiltrated` / `WarFactoryInfiltrated` `HouseClass` fields at apply time
-(readable from any DLL) and accept that naval/aircraft/building spy state — which
-lives only in Antares' `HouseExt` — is unreachable.
+```
+ECX       = BuildingClass* the building entered
+[ESP+0x4] = HouseClass*    the infiltrator's house
+→ MUST return 0 (observer only; never contend for control of this site)
+```
+
+`0x4575A2` is a dead end and should not be used — a documented calling convention
+beats an unverified one. **Phase 5 is therefore unblocked**; nothing about it
+requires a debugger session.
+
+The one real constraint remains, and it is not about hooks: Antares' own
+`SpyEffect.*Veterancy=` booleans call `SetVeteran()` (a hard `1.0`) and, because
+everything here is raise-only, no external DLL can bring that back down. Partial
+spy levels require the new `.Level` tags *and* the framework's booleans left
+unset.
 
 ---
 
@@ -234,7 +245,7 @@ Divergence from Antares here would produce visible inconsistencies:
 
 | Risk | Severity | Mitigation |
 |---|---|---|
-| `0x4575A2` register/stack state differs from hypothesis | **high** — blocks the spy feature | verify in debugger before coding; documented fallback in §5b |
+| ~~`0x4575A2` register/stack state~~ | **RETIRED** | was never a real risk — `0x4571E0` is co-hookable, so `0x4575A2` is not used at all (§5b) |
 | Syringe inter-DLL hook order uncontrollable | medium | design relies on raise-only commutativity, not ordering |
 | Negative INI values break the `M ≥ A` proof | medium | explicit `max(0.0, ...)` clamp, §4 |
 | Savegame: AcademyExt house ext must serialize | medium | own `.Process()` chain; academy list rebuilt identically on load |
@@ -246,18 +257,22 @@ Divergence from Antares here would produce visible inconsistencies:
 
 ## 8. Phases
 
-1. **Verify `0x4575A2`.** Debugger check of the register/stack hypothesis. This
-   gates the spy feature only — deferred, not blocking phases 2–4.
+1. ~~**Verify `0x4575A2`.**~~ **RETIRED — the premise was false.** See §5b:
+   `0x4571E0` is safely co-hookable, so there is no jump-target seam to verify
+   and no debugger session needed.
 2. ~~**Scaffold.**~~ **DONE.** Repo, YRpp/Phobos submodules, CI (Windows-only
    build), house + buildingtype + housetype ext with serialization.
 3. ~~**Academy core.**~~ **DONE.** Own academy list (four list hooks) +
    resolution engine + five apply hooks. `Academy.Stacks` shipped.
 4. ~~**Country bonus.**~~ **DONE** — landed with the scaffold; `AcademyBonus*`
    on HouseType is folded in by `ApplyAcademy` as a contribution.
-5. **Spy levels.** `SpyEffect.*.Level` + infiltration recording at `0x4575A2`.
-6. **Encyclopedia contribution.** New Tier-2 page `encyclopedia/Veterancy-Academy.md`
-   covering the nine academy addresses, the `0x4571E0` wrapper trap, and the
-   verified `0x4575A2` findings — per the standing workflow rule.
+5. **Spy levels.** `SpyEffect.*.Level` + `RecordInfiltration` driven from a
+   `return 0` observer hook at **`0x4571E0`**. Storage and resolution already
+   exist (`HouseExt::InfiltratedSources`, `AddSpyContributions`); only the hook
+   and the wiring are missing. **Unblocked.**
+6. ~~**Encyclopedia contribution.**~~ **DONE** — `encyclopedia/Veterancy-Academy.md`
+   plus a runtime-verified correction to the Syringe chain-semantics claim in
+   `Spy-Infiltration.md` and `Buildability-Prerequisites.md`.
 
 ---
 

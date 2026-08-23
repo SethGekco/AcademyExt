@@ -28,8 +28,8 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 	this->AcademyStacks.Read(exINI, pID, "Academy.Stacks");
 
 	// Spy magnitudes (Phase 5 -- parsed now so the savegame format is stable
-	// from the first release; nothing reads these until the infiltration hook
-	// at 0x4575A2 is verified).
+	// from the first release; nothing populates InfiltratedSources until the
+	// observer hook at 0x4571E0 is wired).
 	this->SpyInfantryLevel.Read(exINI, pID, "SpyEffect.InfantryVeterancy.Level");
 	this->SpyVehicleLevel.Read(exINI, pID, "SpyEffect.VehicleVeterancy.Level");
 	this->SpyNavalLevel.Read(exINI, pID, "SpyEffect.NavalVeterancy.Level");
