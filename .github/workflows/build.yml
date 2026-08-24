@@ -15,6 +15,17 @@ jobs:
         with:
           submodules: recursive
 
+      # Same-address hooks chain legally; hooks at DIFFERENT addresses whose byte
+      # ranges intersect silently corrupt each other's E9 rel32 into a wild jump.
+      # Both can be instruction-aligned, so only a range-intersection check finds
+      # it. Range-checked against every other injected framework's hooks.
+      - name: Check hook overlaps
+        shell: bash
+        run: |
+          curl -sSfL -o hooks.csv \
+            https://raw.githubusercontent.com/SethGekco/YR-Hook-Encyclopedia/main/registry/hooks.csv
+          python3 tools/check_hook_overlap.py hooks.csv src
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
