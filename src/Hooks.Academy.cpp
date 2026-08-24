@@ -109,8 +109,8 @@ DEFINE_HOOK(0x4491D5, BuildingClass_ChangeOwnership_Add_AcademyExt, 0x6)
 // NOTE we deliberately do NOT replicate the infiltration SetVeteran() calls
 // Antares makes in its versions of these handlers. Antares still runs and still
 // performs them; duplicating that here would be redundant at best. The
-// configurable SpyEffect.*.Level form is Phase 5 and flows through
-// ApplyAcademy's own spy contributions instead.
+// configurable SpyEffect.*.Level form flows through ApplyAcademy's own spy
+// contributions instead, fed by the observer in Hooks.Infiltration.cpp.
 
 static void ApplyAcademyTo(TechnoClass* pThis, AcademyCategory category)
 {

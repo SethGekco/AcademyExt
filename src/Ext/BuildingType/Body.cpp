@@ -27,9 +27,8 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 	// AcademyExt's one new academy tag.
 	this->AcademyStacks.Read(exINI, pID, "Academy.Stacks");
 
-	// Spy magnitudes (Phase 5 -- parsed now so the savegame format is stable
-	// from the first release; nothing populates InfiltratedSources until the
-	// observer hook at 0x4571E0 is wired).
+	// Spy magnitudes. Recorded per house by the observer hook at 0x4571E0
+	// (Hooks.Infiltration.cpp) and resolved in HouseExt::AddSpyContributions.
 	this->SpyInfantryLevel.Read(exINI, pID, "SpyEffect.InfantryVeterancy.Level");
 	this->SpyVehicleLevel.Read(exINI, pID, "SpyEffect.VehicleVeterancy.Level");
 	this->SpyNavalLevel.Read(exINI, pID, "SpyEffect.NavalVeterancy.Level");
@@ -75,6 +74,15 @@ bool BuildingTypeExt::ExtData::HasSpyLevel(SpyBranch branch) const
 	case SpyBranch::Building: return this->SpyBuildingLevel.isset();
 	default:                  return false;
 	}
+}
+
+bool BuildingTypeExt::ExtData::HasAnySpyLevel() const
+{
+	return this->SpyInfantryLevel.isset()
+		|| this->SpyVehicleLevel.isset()
+		|| this->SpyNavalLevel.isset()
+		|| this->SpyAircraftLevel.isset()
+		|| this->SpyBuildingLevel.isset();
 }
 
 double BuildingTypeExt::ExtData::GetSpyLevel(SpyBranch branch) const

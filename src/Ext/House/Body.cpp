@@ -153,7 +153,7 @@ void HouseExt::ExtData::ApplyAcademy(
 		}
 	}
 
-	// 3. Spy / infiltration. Inert until Phase 5 populates InfiltratedSources.
+	// 3. Spy / infiltration, recorded by the observer at 0x4571E0.
 	this->AddSpyContributions(resolver, pType, category);
 
 	double const result = resolver.Resolve(RulesClass::Instance->VeteranCap);

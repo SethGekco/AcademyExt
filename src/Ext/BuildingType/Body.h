@@ -43,7 +43,7 @@ public:
 		// behaves identically to before.
 		Valueable<bool> AcademyStacks;
 
-		// -- spy / infiltration magnitudes (Phase 5) --
+		// -- spy / infiltration magnitudes --
 		// Nullable so "unset" is distinguishable from "set to 0.0"; only a set
 		// value registers a contribution at all.
 		//
@@ -97,6 +97,10 @@ public:
 		// Spy level for one branch, or nullptr-equivalent (unset) as false.
 		bool HasSpyLevel(SpyBranch branch) const;
 		double GetSpyLevel(SpyBranch branch) const;
+
+		// True if any branch declares a level at all. Lets the infiltration
+		// observer reject the overwhelmingly common case in one call.
+		bool HasAnySpyLevel() const;
 
 		// Whitelist/blacklist gate. Empty whitelist means "all types";
 		// the blacklist always wins. Mirrors Antares.

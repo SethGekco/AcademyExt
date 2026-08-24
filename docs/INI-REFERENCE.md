@@ -111,9 +111,8 @@ Paired with a stacking `0.5` academy, Russian vehicles reach `1.5`.
 
 ## Spy / infiltration levels — `BuildingType`
 
-> **Phase 5 — parsed but not yet active.** These tags are read and saved, but
-> nothing applies them until the infiltration observer hook is wired. They are
-> documented here so the savegame format is stable from the first release.
+Infiltrating a building grants the **infiltrator's house** a permanent
+contribution at the given level, for each branch the building defines.
 
 ```ini
 [SomeFactory]
@@ -127,9 +126,6 @@ SpyEffect.Veterancy.Types=
 SpyEffect.Veterancy.Ignore=
 ```
 
-Infiltrating a building grants the owning house a permanent contribution at the
-given level, for each branch the building defines.
-
 ### ⚠ Do not combine with Antares' booleans
 
 Antares' own `SpyEffect.InfantryVeterancy=yes` (no `.Level` suffix) promotes to
@@ -142,6 +138,12 @@ SpyEffect.InfantryVeterancy.Level=0.5     ; AcademyExt -> wants 0.5
 
 yields **1.0**, not 0.5. Use one or the other, never both. To use magnitudes,
 leave Antares' booleans unset.
+
+The same applies to the legacy **`SpyEffect.UnitVeterancy=yes`**, which promotes
+via the building's `Factory=` and sets the stock `BarracksInfiltrated` /
+`WarFactoryInfiltrated` house flags. Those are read by the engine itself, so that
+floor cannot be lowered either. Leave it unset if you want partial infantry or
+vehicle levels.
 
 Re-infiltrating the same building *type* does not stack with itself.
 

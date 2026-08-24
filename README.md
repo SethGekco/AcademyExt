@@ -35,12 +35,11 @@ See [docs/INI-REFERENCE.md](docs/INI-REFERENCE.md) for the full tag list and
 
 ## Status
 
-**Academy stacking and the country bonus are implemented and hooked.** Spy
-veterancy levels (`SpyEffect.*Veterancy.Level=`) are parsed and serialized but
-not yet applied — that path is gated on verifying one hook address. See the
-phase list in [DESIGN.md](DESIGN.md#8-phases).
+**Feature-complete.** Academy stacking, the passive country bonus and
+configurable spy veterancy levels are all implemented and hooked. CI is green.
 
-> Not yet verified in-game, and CI has not built it yet.
+> Built and deployed, but **not yet verified in-game**. A green build is not
+> behaviour.
 
 ## Building
 

@@ -266,10 +266,9 @@ Divergence from Antares here would produce visible inconsistencies:
    resolution engine + five apply hooks. `Academy.Stacks` shipped.
 4. ~~**Country bonus.**~~ **DONE** — landed with the scaffold; `AcademyBonus*`
    on HouseType is folded in by `ApplyAcademy` as a contribution.
-5. **Spy levels.** `SpyEffect.*.Level` + `RecordInfiltration` driven from a
-   `return 0` observer hook at **`0x4571E0`**. Storage and resolution already
-   exist (`HouseExt::InfiltratedSources`, `AddSpyContributions`); only the hook
-   and the wiring are missing. **Unblocked.**
+5. ~~**Spy levels.**~~ **DONE.** `SpyEffect.*.Level` recorded by a `return 0`
+   observer at `0x4571E0` (`src/Hooks.Infiltration.cpp`) into
+   `HouseExt::InfiltratedSources`, resolved by `AddSpyContributions`.
 6. ~~**Encyclopedia contribution.**~~ **DONE** — `encyclopedia/Veterancy-Academy.md`
    plus a runtime-verified correction to the Syringe chain-semantics claim in
    `Spy-Infiltration.md` and `Buildability-Prerequisites.md`.

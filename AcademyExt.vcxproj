@@ -34,6 +34,7 @@
     <ClCompile Include="src\Ext\House\Body.cpp" />
     <!-- Feature hooks -->
     <ClCompile Include="src\Hooks.Academy.cpp" />
+    <ClCompile Include="src\Hooks.Infiltration.cpp" />
   </ItemGroup>
 
   <!-- Header files -->
