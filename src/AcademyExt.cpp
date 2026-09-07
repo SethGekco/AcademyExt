@@ -12,10 +12,18 @@ char AcademyExtDLL::readBuffer[AcademyExtDLL::readLength];
 wchar_t AcademyExtDLL::wideBuffer[AcademyExtDLL::readLength];
 
 bool AcademyExtDLL::Authoritative = false;
+bool AcademyExtDLL::DebugLog = false;
 
 void AcademyExtDLL::ExeRun()
 {
 	Patch::ApplyStatic();
+
+	// Unconditional load banner. Without it `grep AcademyExt debug.log` returning
+	// nothing is ambiguous -- it could mean "not injected" or "injected but had
+	// nothing to say", and those need completely different debugging. One line
+	// at startup makes the standard diagnostic actually diagnostic.
+	Debug::Log("[AcademyExt] loaded. Set [General] AcademyExt.Debug=yes to log "
+		"every veterancy decision.\n");
 }
 
 bool __stdcall DllMain(HANDLE hInstance, DWORD dwReason, LPVOID)

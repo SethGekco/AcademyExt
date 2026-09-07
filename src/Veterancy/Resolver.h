@@ -52,6 +52,12 @@ public:
 		return this->Count == 0;
 	}
 
+	// Diagnostics only -- exposed so the debug log can show WHY a value came
+	// out the way it did, rather than leaving "did it work?" to inference.
+	int Sources() const { return this->Count; }
+	double Best() const { return this->BestSingle; }
+	double Sum() const { return this->StackSum; }
+
 private:
 	double BestSingle = 0.0; // max over contributions with stacks == false
 	double StackSum = 0.0;   // sum over contributions with stacks == true

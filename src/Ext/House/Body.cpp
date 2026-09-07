@@ -183,6 +183,25 @@ void HouseExt::ExtData::ApplyAcademy(
 	double const veterancyCap = RulesClass::Instance->VeteranCap;
 	auto& current = pTechno->Veterancy.Veterancy;
 
+	// Show the working. "Is it applying a bonus, and where did the number come
+	// from?" should be answerable from the log, not inferred from chevrons --
+	// especially since partial levels render identically to none at all.
+	if (AcademyExtDLL::DebugLog && (!resolver.Empty() || hasCap))
+	{
+		Debug::Log("[AcademyExt] %s (cat %d): %d source(s), bestSingle=%.3f "
+			"stackSum=%.3f -> resolved=%.3f | cap=%s%.3f | current=%.3f | mode=%s\n",
+			pType->ID,
+			static_cast<int>(category),
+			resolver.Sources(),
+			resolver.Best(),
+			resolver.Sum(),
+			resolver.Resolve(veterancyCap),
+			hasCap ? "" : "none:",
+			hasCap ? cap : 0.0,
+			static_cast<double>(current),
+			AcademyExtDLL::Authoritative ? "authoritative" : "raise-only");
+	}
+
 	// ---- default: raise-only ------------------------------------------------
 	// Commutative with Antares, so the outcome does not depend on Syringe load
 	// order. A cap cannot bite here -- lowering is impossible by construction --
@@ -210,7 +229,18 @@ void HouseExt::ExtData::ApplyAcademy(
 		double const result = resolver.Resolve(veterancyCap);
 
 		if (result > current)
+		{
+			if (AcademyExtDLL::DebugLog)
+				Debug::Log("[AcademyExt]   -> raised %.3f to %.3f\n",
+					static_cast<double>(current), result);
+
 			current = static_cast<float>(result);
+		}
+		else if (AcademyExtDLL::DebugLog)
+		{
+			Debug::Log("[AcademyExt]   -> left at %.3f (resolved %.3f was not higher)\n",
+				static_cast<double>(current), result);
+		}
 
 		return;
 	}
@@ -231,7 +261,13 @@ void HouseExt::ExtData::ApplyAcademy(
 	if (hasCap)
 		result = std::min(result, cap);
 
-	current = static_cast<float>(std::clamp(result, 0.0, veterancyCap));
+	result = std::clamp(result, 0.0, veterancyCap);
+
+	if (AcademyExtDLL::DebugLog)
+		Debug::Log("[AcademyExt]   -> wrote %.3f over %.3f (authoritative)\n",
+			result, static_cast<double>(current));
+
+	current = static_cast<float>(result);
 }
 
 // ============================================================================

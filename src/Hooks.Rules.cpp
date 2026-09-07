@@ -28,6 +28,9 @@ DEFINE_HOOK(0x679CAF, RulesClass_LoadAfterTypeData_AcademyExt, 0x5)
 	AcademyExtDLL::Authoritative =
 		pINI->ReadBool("General", "AcademyExt.Authoritative", AcademyExtDLL::Authoritative);
 
+	AcademyExtDLL::DebugLog =
+		pINI->ReadBool("General", "AcademyExt.Debug", AcademyExtDLL::DebugLog);
+
 	// Log the transition only, not every pass -- Read_File runs several times
 	// (rulesmd, game mode, map) and this would otherwise spam the log.
 	if (AcademyExtDLL::Authoritative && !wasAuthoritative)

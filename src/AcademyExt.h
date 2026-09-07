@@ -24,5 +24,9 @@ public:
 	// pass, and rules are always read before any scenario or savegame loads.
 	static bool Authoritative;
 
+	// [General] AcademyExt.Debug -- logs every veterancy decision with its
+	// inputs. Off by default because it is one line per trainable object built.
+	static bool DebugLog;
+
 	static void ExeRun();
 };
