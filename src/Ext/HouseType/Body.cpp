@@ -21,6 +21,7 @@ void HouseTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 	this->AcademyBonusAircraft.Read(exINI, pID, "AcademyBonus.Aircraft");
 	this->AcademyBonusBuilding.Read(exINI, pID, "AcademyBonus.Building");
 	this->AcademyBonusStacks.Read(exINI, pID, "AcademyBonus.Stacks");
+	this->AcademyBonusCap.Read(exINI, pID, "AcademyBonus.Cap");
 	this->AcademyBonusWhitelist.Read(exINI, pID, "AcademyBonus.Types");
 	this->AcademyBonusBlacklist.Read(exINI, pID, "AcademyBonus.Ignore");
 
@@ -94,6 +95,7 @@ void HouseTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AcademyBonusAircraft)
 		.Process(this->AcademyBonusBuilding)
 		.Process(this->AcademyBonusStacks)
+		.Process(this->AcademyBonusCap)
 		.Process(this->AcademyBonusWhitelist)
 		.Process(this->AcademyBonusBlacklist)
 		;

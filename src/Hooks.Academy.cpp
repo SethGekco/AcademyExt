@@ -49,7 +49,9 @@ static void UpdateAcademyFor(BuildingClass* pThis, bool added)
 
 	auto const pExt = BuildingTypeExt::ExtMap.Find(pThis->Type);
 
-	if (!pExt || !pExt->IsAcademy())
+	// IsTracked(), not IsAcademy(): a cap-only building grants nothing but must
+	// still be on the list for its ceiling to apply.
+	if (!pExt || !pExt->IsTracked())
 		return;
 
 	if (auto const pHouseExt = HouseExt::ExtMap.Find(pThis->Owner))

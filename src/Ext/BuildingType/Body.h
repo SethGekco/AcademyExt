@@ -43,6 +43,14 @@ public:
 		// behaves identically to before.
 		Valueable<bool> AcademyStacks;
 
+		// Ceiling this academy imposes on the FINAL veterancy, from any source.
+		// Nullable because "no cap" and "cap of 0" are different statements.
+		//
+		// Only bites in authoritative mode -- capping means lowering, and
+		// raise-only cannot lower. Configuring one without
+		// [General] AcademyExt.Authoritative=yes is a silent no-op, so we warn.
+		Nullable<double> AcademyCap;
+
 		// -- spy / infiltration magnitudes --
 		// Nullable so "unset" is distinguishable from "set to 0.0"; only a set
 		// value registers a contribution at all.
@@ -68,6 +76,7 @@ public:
 			, AcademyWhitelist {}
 			, AcademyBlacklist {}
 			, AcademyStacks { false }
+			, AcademyCap {}
 			, SpyInfantryLevel {}
 			, SpyVehicleLevel {}
 			, SpyNavalLevel {}
@@ -89,6 +98,12 @@ public:
 
 		// Mirrors Antares: a building is an academy iff any category is > 0.
 		bool IsAcademy() const;
+
+		// Whether AcademyExt should track this building on its house's list.
+		// WIDER than IsAcademy() on purpose: a building that declares only
+		// Academy.Cap grants nothing but still has to be present for its ceiling
+		// to be applied. Antares' list gate stays IsAcademy(); this one is ours.
+		bool IsTracked() const;
 
 		// Academy bonus for one category. Naval has no academy counterpart and
 		// is not accepted here -- it is a spy-only branch.

@@ -12,6 +12,7 @@
 #include <Utilities/Macro.h>
 #include <Utilities/Debug.h>
 
+#include <AcademyExt.h>
 #include <Ext/BuildingType/Body.h>
 #include <Ext/HouseType/Body.h>
 
@@ -126,6 +127,22 @@ void HouseExt::ExtData::ApplyAcademy(
 
 	VeterancyResolver resolver;
 
+	// Ceilings are collected alongside contributions. The MOST RESTRICTIVE
+	// (lowest) cap among everything that applies wins -- a cap is a promise
+	// about a maximum, so two caps must not be able to raise each other.
+	bool hasCap = false;
+	double cap = 0.0;
+
+	auto const considerCap = [&hasCap, &cap](Nullable<double> const& candidate)
+	{
+		if (!candidate.isset())
+			return;
+
+		double const value = candidate.Get(0.0);
+		cap = hasCap ? std::min(cap, value) : value;
+		hasCap = true;
+	};
+
 	// 1. Academy buildings this house owns.
 	for (auto const& pBuilding : this->Academies)
 	{
@@ -141,6 +158,8 @@ void HouseExt::ExtData::ApplyAcademy(
 
 		if (value != 0.0)
 			resolver.Add(value, pExt->AcademyStacks);
+
+		considerCap(pExt->AcademyCap);
 	}
 
 	// 2. Passive country bonus.
@@ -148,23 +167,71 @@ void HouseExt::ExtData::ApplyAcademy(
 	{
 		if (auto const pCountryExt = HouseTypeExt::ExtMap.Find(pOwner->Type))
 		{
-			if (pCountryExt->HasBonus(category) && pCountryExt->AppliesTo(pType))
-				resolver.Add(pCountryExt->GetBonus(category), pCountryExt->AcademyBonusStacks);
+			if (pCountryExt->AppliesTo(pType))
+			{
+				if (pCountryExt->HasBonus(category))
+					resolver.Add(pCountryExt->GetBonus(category), pCountryExt->AcademyBonusStacks);
+
+				considerCap(pCountryExt->AcademyBonusCap);
+			}
 		}
 	}
 
 	// 3. Spy / infiltration, recorded by the observer at 0x4571E0.
 	this->AddSpyContributions(resolver, pType, category);
 
-	double const result = resolver.Resolve(RulesClass::Instance->VeteranCap);
-
-	// RAISE-ONLY -- invariant 2 in DESIGN.md section 4. Lowering the value here
-	// would break co-existence with Antares, whose handler runs at the same
-	// addresses and has already written its own (never larger) result.
+	double const veterancyCap = RulesClass::Instance->VeteranCap;
 	auto& current = pTechno->Veterancy.Veterancy;
 
-	if (result > current)
-		current = static_cast<float>(result);
+	// ---- default: raise-only ------------------------------------------------
+	// Commutative with Antares, so the outcome does not depend on Syringe load
+	// order. A cap cannot bite here -- lowering is impossible by construction --
+	// which is exactly why authoritative mode exists.
+	if (!AcademyExtDLL::Authoritative)
+	{
+		if (hasCap)
+		{
+			// Silent no-ops are the worst failure mode in this codebase, so say
+			// it once rather than let someone hunt a cap that never applies.
+			static bool warned = false;
+			if (!warned)
+			{
+				warned = true;
+				Debug::Log("[AcademyExt] WARNING: an Academy.Cap / AcademyBonus.Cap is "
+					"configured, but [General] AcademyExt.Authoritative is not set. "
+					"Caps lower veterancy and raise-only mode cannot lower anything, "
+					"so every cap is being ignored.\n");
+			}
+		}
+
+		if (resolver.Empty())
+			return;
+
+		double const result = resolver.Resolve(veterancyCap);
+
+		if (result > current)
+			current = static_cast<float>(result);
+
+		return;
+	}
+
+	// ---- authoritative: we are the final writer -----------------------------
+	// Only when we actually have something to say. Writing unconditionally with
+	// no contribution and no cap would stamp 0.0 over every rank the object got
+	// from anywhere else -- spy effects, VeteranBuildings, country VeteranX.
+	if (resolver.Empty() && !hasCap)
+		return;
+
+	// Start from whatever the object would otherwise have ended up with. We run
+	// after Antares in the Syringe chain, so `current` already carries its
+	// academy, VeteranBuildings and infiltration promotions -- taking the max
+	// keeps all of those intact, and the cap below is what deliberately lowers.
+	double result = std::max(resolver.Resolve(veterancyCap), static_cast<double>(current));
+
+	if (hasCap)
+		result = std::min(result, cap);
+
+	current = static_cast<float>(std::clamp(result, 0.0, veterancyCap));
 }
 
 // ============================================================================

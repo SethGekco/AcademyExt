@@ -154,12 +154,59 @@ Antares' handler becomes a harmless no-op underneath.
    Antares implicitly clamps at 0 by seeding `veterancyBonus = 0.0`. AcademyExt's
    `stack_sum` could go negative without the explicit `max(0.0, ...)`, which
    would break `M ≥ A`.
-2. **Raise-only.** AcademyExt must never *lower* an existing veterancy value. A
-   consequence worth accepting up front: **a "cap" or "override" academy that
-   reduces veterancy is impossible** under this architecture.
+2. **Raise-only.** In the default mode AcademyExt never *lowers* an existing
+   veterancy value.
 
-Syringe hook **order between DLLs is not controllable**. The design deliberately
-relies on commutativity (both raise-only) rather than on winning the race.
+Syringe hook **order between DLLs is not controllable**. The default mode
+deliberately relies on commutativity (both raise-only) rather than on winning
+the race.
+
+### 4a. Authoritative mode — reduction *is* reachable
+
+An earlier revision of this document claimed a cap/override/demote academy was
+"architecturally impossible". **That was wrong**, and it conflated a property of
+the default mode with a property of the architecture. Three facts make reduction
+reachable:
+
+1. **Antares' academy is entirely INI-gated.** `BuildingTypeExt::Academy` is
+   computed once at parse time (`AcademyInfantry > 0.0 || ...`) and
+   `IsAcademy()` is the *only* gate on list membership across all four of its
+   bookkeeping hooks. With those tags unset its `Academies` list is permanently
+   empty, `ApplyAcademy` resolves `0.0`, and its `if (bonus > value)` never
+   fires. It can be neutralised by configuration alone — no patching, and no
+   need for a runtime "disable Antares" switch.
+2. **Syringe runs handlers in `-i=` order**, and all academy handlers return
+   `0`. Antares is injected early and AcademyExt late, so ours already runs
+   **last** at every apply site. Whatever we write is the final word — the only
+   thing stopping us was our own clamp.
+3. **Nothing re-raises it afterwards.** Antares' per-frame
+   `TechnoClass_Update_Veterancy` (`0x6FA054`) calls `HandlePromotion`, which
+   reacts to rank *changes* and never writes veterancy itself.
+
+**`[General] AcademyExt.Authoritative=yes`** therefore switches the final write
+from raise-only to unconditional, which is what lets `Academy.Cap=` /
+`AcademyBonus.Cap=` actually lower a rank.
+
+**The trade, stated plainly:** authoritative mode is **load-order dependent**.
+It is correct only while AcademyExt is injected *after* Antares. If that were
+reversed, Antares would run last and raise the value back — caps would silently
+stop working while everything else kept functioning. That is why it is opt-in,
+defaults off, and logs the requirement loudly when enabled. The default mode
+remains provably order-independent.
+
+**Why lowering goes through a cap rather than a contribution.** The resolution
+rule is `max(best, sum)`, which can never yield a smaller number, so no
+contribution can pull a rank down. Authoritative mode also starts from
+`max(resolved, current)` so that ranks earned elsewhere (spy effects,
+`VeteranBuildings`, country `VeteranX`) survive by default. The cap is the
+single, explicit lowering tool — which keeps "this reduces veterancy" a thing
+the modder opts into per academy rather than an emergent side effect.
+
+**Known cosmetic hazard for any future *runtime* demote.** `HandlePromotion`
+selects its sound, flash and `Promote_VeteranType` conversion by the **new**
+rank, so demoting elite→veteran mid-life would fire the *veteran promotion*
+effects. Initial-rank reduction is unaffected: at `Init` the object's
+`CurrentRanking` is still `Rank::Invalid`, which that function guards against.
 
 ---
 

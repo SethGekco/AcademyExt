@@ -35,6 +35,7 @@
     <!-- Feature hooks -->
     <ClCompile Include="src\Hooks.Academy.cpp" />
     <ClCompile Include="src\Hooks.Infiltration.cpp" />
+    <ClCompile Include="src\Hooks.Rules.cpp" />
   </ItemGroup>
 
   <!-- Header files -->

@@ -38,6 +38,10 @@ public:
 		// meant to combine with what the player builds, not compete with it.
 		Valueable<bool> AcademyBonusStacks;
 
+		// Ceiling this country imposes on the FINAL veterancy, from any source.
+		// Same authoritative-mode caveat as BuildingTypeExt::AcademyCap.
+		Nullable<double> AcademyBonusCap;
+
 		ValueableVector<TechnoTypeClass*> AcademyBonusWhitelist;
 		ValueableVector<TechnoTypeClass*> AcademyBonusBlacklist;
 
@@ -48,6 +52,7 @@ public:
 			, AcademyBonusAircraft {}
 			, AcademyBonusBuilding {}
 			, AcademyBonusStacks { true }
+			, AcademyBonusCap {}
 			, AcademyBonusWhitelist {}
 			, AcademyBonusBlacklist {}
 		{ }

@@ -24,6 +24,8 @@ class VeterancyResolver
 public:
 	void Add(double value, bool stacks)
 	{
+		++this->Count;
+
 		if (stacks)
 			this->StackSum += value;
 		else
@@ -41,12 +43,17 @@ public:
 		return std::clamp(combined, 0.0, cap);
 	}
 
+	// "Did any source have an opinion?" -- deliberately a COUNT, not a test for
+	// a zero result. In authoritative mode this decides whether we write at all,
+	// and a legitimate contribution of exactly 0.0 (a demote-to-rookie academy)
+	// must not read as "nothing to say".
 	bool Empty() const
 	{
-		return this->BestSingle == 0.0 && this->StackSum == 0.0;
+		return this->Count == 0;
 	}
 
 private:
 	double BestSingle = 0.0; // max over contributions with stacks == false
 	double StackSum = 0.0;   // sum over contributions with stacks == true
+	int Count = 0;           // how many sources contributed at all
 };

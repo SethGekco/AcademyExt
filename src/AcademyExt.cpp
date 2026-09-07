@@ -11,6 +11,8 @@ HANDLE AcademyExtDLL::hInstance = nullptr;
 char AcademyExtDLL::readBuffer[AcademyExtDLL::readLength];
 wchar_t AcademyExtDLL::wideBuffer[AcademyExtDLL::readLength];
 
+bool AcademyExtDLL::Authoritative = false;
+
 void AcademyExtDLL::ExeRun()
 {
 	Patch::ApplyStatic();

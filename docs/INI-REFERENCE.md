@@ -24,9 +24,57 @@ result = max( best non-stacking contribution, sum of all stacking ones )
 With three academies — A non-stacking, B and C stacking — the game awards
 `max(A, B+C)`. Whichever is genuinely better wins.
 
-> **AcademyExt only ever raises veterancy, never lowers it.** A negative value
-> cannot pull a unit's rank down, and there is no "cap" or "override" academy.
-> This is a deliberate architectural constraint — see DESIGN.md section 4.
+By default **AcademyExt only ever raises veterancy**. A contribution can never
+pull a rank down — `max(best, sum)` cannot produce a smaller number. To lower a
+rank you need a cap *and* authoritative mode, both described below.
+
+---
+
+## Authoritative mode & caps — `[General]`
+
+```ini
+[General]
+AcademyExt.Authoritative=no     ; default no
+```
+
+**Default (`no`):** the resolved bonus is applied raise-only. This is
+commutative with Antares, so the result does not depend on which order the DLLs
+were injected. Caps are ignored (and the DLL logs a warning if you set one).
+
+**`yes`:** AcademyExt becomes the final writer for veterancy at unit creation
+and writes unconditionally *whenever it has something to say* — at least one
+contribution, or an applicable cap. This is what allows a cap to lower a rank.
+
+> **⚠ Requires AcademyExt to be injected AFTER Antares** in the Syringe `-i=`
+> list. Syringe runs handlers in `-i=` order; if Antares ran after us it would
+> raise the value back and every cap would silently do nothing. The DLL logs
+> this requirement when the mode is enabled.
+
+### Caps
+
+```ini
+[SomeBuilding]
+Academy.Cap=1.0                 ; this building ceilings the final rank
+
+[SomeCountry]
+AcademyBonus.Cap=1.0            ; this country ceilings the final rank
+```
+
+A cap is a ceiling on the **final** veterancy from *any* source — including spy
+effects, `VeteranBuildings` and Antares' own academy. When several apply, the
+**lowest** wins: a cap is a promise about a maximum, so two caps must never be
+able to raise each other.
+
+A building may declare `Academy.Cap=` **without** any `Academy.*Veterancy` — it
+then grants nothing and only imposes its ceiling.
+
+| Goal | How |
+|---|---|
+| **Cap** — nothing exceeds veteran | `Academy.Cap=1.0` |
+| **Demote** — force rookie | `Academy.Cap=0.0` |
+| **Override** — force exactly 0.5 | `Academy.Cap=0.5` plus a contribution of `0.5` |
+
+Everything is still bounded by `[General] VeteranCap=`.
 
 ---
 
@@ -41,6 +89,7 @@ Academy.BuildingVeterancy=0.0   ; BuildingTypes
 Academy.Types=                  ; whitelist; empty means all types
 Academy.Ignore=                 ; blacklist; always wins over the whitelist
 Academy.Stacks=no               ; NEW
+Academy.Cap=                    ; NEW -- ceiling; needs authoritative mode
 ```
 
 The first six tags are Antares' own and behave exactly as before.
@@ -80,6 +129,7 @@ AcademyBonus.Vehicle=
 AcademyBonus.Aircraft=
 AcademyBonus.Building=
 AcademyBonus.Stacks=yes         ; default YES
+AcademyBonus.Cap=               ; optional ceiling -- see "Authoritative mode & caps"
 AcademyBonus.Types=             ; optional whitelist
 AcademyBonus.Ignore=            ; optional blacklist
 ```

@@ -24,8 +24,9 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 	this->AcademyWhitelist.Read(exINI, pID, "Academy.Types");
 	this->AcademyBlacklist.Read(exINI, pID, "Academy.Ignore");
 
-	// AcademyExt's one new academy tag.
+	// AcademyExt's new academy tags.
 	this->AcademyStacks.Read(exINI, pID, "Academy.Stacks");
+	this->AcademyCap.Read(exINI, pID, "Academy.Cap");
 
 	// Spy magnitudes. Recorded per house by the observer hook at 0x4571E0
 	// (Hooks.Infiltration.cpp) and resolved in HouseExt::AddSpyContributions.
@@ -49,6 +50,11 @@ bool BuildingTypeExt::ExtData::IsAcademy() const
 		|| this->AcademyAircraft > 0.0
 		|| this->AcademyVehicle > 0.0
 		|| this->AcademyBuilding > 0.0;
+}
+
+bool BuildingTypeExt::ExtData::IsTracked() const
+{
+	return this->IsAcademy() || this->AcademyCap.isset();
 }
 
 double BuildingTypeExt::ExtData::GetAcademyValue(AcademyCategory category) const
@@ -134,6 +140,7 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AcademyWhitelist)
 		.Process(this->AcademyBlacklist)
 		.Process(this->AcademyStacks)
+		.Process(this->AcademyCap)
 		.Process(this->SpyInfantryLevel)
 		.Process(this->SpyVehicleLevel)
 		.Process(this->SpyNavalLevel)
