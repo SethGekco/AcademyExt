@@ -38,8 +38,13 @@ See [docs/INI-REFERENCE.md](docs/INI-REFERENCE.md) for the full tag list and
 **Feature-complete.** Academy stacking, the passive country bonus and
 configurable spy veterancy levels are all implemented and hooked. CI is green.
 
-> Built and deployed, but **not yet verified in-game**. A green build is not
-> behaviour.
+**Stacking is verified in game.** With a stacking academy worth `0.5`: one
+building produced no chevron, two produced veteran, four produced elite. Antares
+alone takes the `max` and sits at `0.5` forever, so neither promotion could have
+come from anywhere else.
+
+Not yet exercised in game: the non-stacking-vs-stack comparison, the country
+bonus, spy levels, and authoritative mode / caps.
 
 ## Building
 

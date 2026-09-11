@@ -8,7 +8,10 @@ bonus.
 - **Depends on:** Antares (co-loaded). **Never edits Antares.**
 - **Framework lineage:** YRpp / Syringe, Ares-lineage. Do not use Ares — see
   `antares-replaces-ares`.
-- **Status:** design only. No code yet.
+- **Status:** feature-complete, CI green, deployed. **Stacking verified in
+  game** (0.5-per-building academy: 1 → no chevron, 2 → veteran, 4 → elite,
+  which Antares' `max` could not produce). Remaining features implemented but
+  not yet exercised in game.
 
 ---
 
