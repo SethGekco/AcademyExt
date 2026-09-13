@@ -5,6 +5,7 @@
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
 
+#include <AbstractClass.h>
 #include <HouseClass.h>
 
 #include <AcademyEnums.h>
@@ -81,6 +82,27 @@ public:
 	public:
 		ExtContainer();
 		~ExtContainer();
+
+		// MUST be overridden or ExtData::InvalidatePointer is NEVER called.
+		//
+		// Container::PointerGotInvalid gates the whole invalidation pass behind
+		// InvalidateExtDataIgnorable, and the base implementation returns true
+		// (= ignore everything). Without this the AnnounceInvalidPointer hook
+		// runs but dispatches nothing, so the Academies list is never scrubbed --
+		// precisely the dangling-BuildingClass* case ExtData::InvalidatePointer
+		// documents ("ApplyAcademy would dereference it on the next unit built").
+		//
+		// Found via SquadExt, which crashed in-game from the same omission
+		// (C0000005 at 0x5F6467, inside AbstractClass::DistanceFrom, on freed
+		// memory). An IsAlive-style guard is no defence: reading any field off a
+		// freed object is already undefined.
+		virtual bool InvalidateExtDataIgnorable(void* const ptr) const override
+		{
+			// Academies holds BuildingClass*. InfiltratedSources holds
+			// BuildingTypeClass*, which lives for the whole scenario and is
+			// never individually invalidated.
+			return static_cast<AbstractClass*>(ptr)->WhatAmI() != AbstractType::Building;
+		}
 	};
 
 	static ExtContainer ExtMap;
