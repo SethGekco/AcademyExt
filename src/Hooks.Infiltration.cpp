@@ -32,11 +32,27 @@
 #include <Utilities/Debug.h>
 #include <Utilities/Macro.h>
 
+#include <AcademyExt.h>
 #include <Ext/BuildingType/Body.h>
 #include <Ext/House/Body.h>
 
 DEFINE_HOOK(0x4571E0, BuildingClass_Infiltrate_AcademyExt, 0x5)
 {
+	// LIVENESS PROBE -- deliberately the FIRST statement, before every bail.
+	//
+	// A same-address co-hook is legal (Syringe installs it without complaint)
+	// but legal is not the same as LIVE, and whether an earlier handler's
+	// non-zero return kills the rest of the chain is currently UNRESOLVED: this
+	// repository has one in-game observation each way (a later handler at THIS
+	// address did run; a later handler at 0x449CC1 never emitted a line at all).
+	//
+	// Without a probe here, "spy veterancy did nothing" is ambiguous between a
+	// dead handler and a building with no SpyEffect.*Veterancy.Level set --
+	// and that exact ambiguity has already cost a full debug round elsewhere.
+	// Never conclude this handler runs from source alone; confirm the line.
+	if (AcademyExtDLL::DebugLog)
+		Debug::Log("[AcademyExt] infiltration hook at 0x4571E0 fired.\n");
+
 	GET(BuildingClass*, pVictim, ECX);
 	GET_STACK(HouseClass*, pEnterer, 0x4);
 
