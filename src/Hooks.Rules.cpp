@@ -23,6 +23,9 @@ DEFINE_HOOK(0x679CAF, RulesClass_LoadAfterTypeData_AcademyExt, 0x5)
 	if (!pINI)
 		return 0;
 
+	// First point in startup where the log file exists. See LogBannerOnce.
+	AcademyExtDLL::LogBannerOnce();
+
 	bool const wasAuthoritative = AcademyExtDLL::Authoritative;
 
 	AcademyExtDLL::Authoritative =

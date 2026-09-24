@@ -29,4 +29,8 @@ public:
 	static bool DebugLog;
 
 	static void ExeRun();
+
+	// Emitted from the first rules parse, never from ExeRun -- see the comment
+	// on the definition. Idempotent.
+	static void LogBannerOnce();
 };

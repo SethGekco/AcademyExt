@@ -17,13 +17,37 @@ bool AcademyExtDLL::DebugLog = false;
 void AcademyExtDLL::ExeRun()
 {
 	Patch::ApplyStatic();
+}
 
-	// Unconditional load banner. Without it `grep AcademyExt debug.log` returning
-	// nothing is ambiguous -- it could mean "not injected" or "injected but had
-	// nothing to say", and those need completely different debugging. One line
-	// at startup makes the standard diagnostic actually diagnostic.
+// Deliberately NOT called from ExeRun. Anything logged at ExeRun time is written
+// before the log file exists and is silently lost -- which is exactly why the
+// banner added last round never appeared, and why `grep AcademyExt debug.log`
+// stayed ambiguous between "not injected" and "injected but silent". IntelExt
+// hit and documented the same trap; this mirrors its fix by logging from the
+// first rules parse instead.
+void AcademyExtDLL::LogBannerOnce()
+{
+	static bool logged = false;
+
+	if (logged)
+		return;
+
+	logged = true;
+
 	Debug::Log("[AcademyExt] loaded. Set [General] AcademyExt.Debug=yes to log "
 		"every veterancy decision.\n");
+
+	// AcademyExt reimplements the academy pipeline rather than extending
+	// Antares', and composes with it by only ever raising. Without Antares the
+	// features still work, but a modder comparing behaviour should know which
+	// half of the stack is missing rather than guess.
+	if (!GetModuleHandleA("Antares.dll"))
+	{
+		Debug::Log("[AcademyExt] NOTE: Antares.dll is not loaded. AcademyExt's own "
+			"academy/country/spy veterancy still applies, but Antares' academy "
+			"and its SpyEffect promotions are absent. Ares is not a supported "
+			"substitute.\n");
+	}
 }
 
 bool __stdcall DllMain(HANDLE hInstance, DWORD dwReason, LPVOID)
