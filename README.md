@@ -38,13 +38,19 @@ See [docs/INI-REFERENCE.md](docs/INI-REFERENCE.md) for the full tag list and
 **Feature-complete.** Academy stacking, the passive country bonus and
 configurable spy veterancy levels are all implemented and hooked. CI is green.
 
-**Stacking is verified in game.** With a stacking academy worth `0.5`: one
-building produced no chevron, two produced veteran, four produced elite. Antares
-alone takes the `max` and sits at `0.5` forever, so neither promotion could have
-come from anywhere else.
+### Verified in game
 
-Not yet exercised in game: the non-stacking-vs-stack comparison, the country
-bonus, spy levels, and authoritative mode / caps.
+| Feature | Result |
+|---|---|
+| **Stacking** | 0.5 academy: 1 building → no chevron, 2 → veteran, 4 → elite |
+| **Non-stacking vs the stack** | 1.0 academy + 1 stacking building → veteran (it competed); + 4 → elite (the stack overtook it) |
+| **Spy veterancy levels** | non-stacking `2.0` on infiltration → `bestSingle` 1.0→2.0, `stackSum` untouched → elite; 12 infiltrations, 12 recorded |
+
+Antares reads the same `Academy.*Veterancy` tags and takes the `max`, so it
+resolved `0.5` throughout the stacking rows and cannot account for any of these.
+
+Not yet exercised in game: the passive country bonus, and authoritative mode /
+caps.
 
 ## Building
 
