@@ -27,6 +27,10 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 	// AcademyExt's new academy tags.
 	this->AcademyStacks.Read(exINI, pID, "Academy.Stacks");
 	this->AcademyCap.Read(exINI, pID, "Academy.Cap");
+	this->AcademyCapInfantry.Read(exINI, pID, "Academy.Cap.Infantry");
+	this->AcademyCapVehicle.Read(exINI, pID, "Academy.Cap.Vehicle");
+	this->AcademyCapAircraft.Read(exINI, pID, "Academy.Cap.Aircraft");
+	this->AcademyCapBuilding.Read(exINI, pID, "Academy.Cap.Building");
 
 	// Spy magnitudes. Recorded per house by the observer hook at 0x4571E0
 	// (Hooks.Infiltration.cpp) and resolved in HouseExt::AddSpyContributions.
@@ -54,7 +58,47 @@ bool BuildingTypeExt::ExtData::IsAcademy() const
 
 bool BuildingTypeExt::ExtData::IsTracked() const
 {
-	return this->IsAcademy() || this->AcademyCap.isset();
+	return this->IsAcademy() || this->HasAnyCap();
+}
+
+bool BuildingTypeExt::ExtData::HasAnyCap() const
+{
+	return this->AcademyCap.isset()
+		|| this->AcademyCapInfantry.isset()
+		|| this->AcademyCapVehicle.isset()
+		|| this->AcademyCapAircraft.isset()
+		|| this->AcademyCapBuilding.isset();
+}
+
+// Per-category tag wins; the bare Academy.Cap is the all-categories fallback.
+Nullable<double> const* BuildingTypeExt::ExtData::CapFor(AcademyCategory category) const
+{
+	Nullable<double> const* pSpecific = nullptr;
+
+	switch (category)
+	{
+	case AcademyCategory::Infantry: pSpecific = &this->AcademyCapInfantry; break;
+	case AcademyCategory::Vehicle:  pSpecific = &this->AcademyCapVehicle;  break;
+	case AcademyCategory::Aircraft: pSpecific = &this->AcademyCapAircraft; break;
+	case AcademyCategory::Building: pSpecific = &this->AcademyCapBuilding; break;
+	default:                        return nullptr;
+	}
+
+	if (pSpecific->isset())
+		return pSpecific;
+
+	return this->AcademyCap.isset() ? &this->AcademyCap : nullptr;
+}
+
+bool BuildingTypeExt::ExtData::HasCap(AcademyCategory category) const
+{
+	return this->CapFor(category) != nullptr;
+}
+
+double BuildingTypeExt::ExtData::GetCap(AcademyCategory category) const
+{
+	auto const pCap = this->CapFor(category);
+	return pCap ? pCap->Get(0.0) : 0.0;
 }
 
 double BuildingTypeExt::ExtData::GetAcademyValue(AcademyCategory category) const
@@ -141,6 +185,10 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AcademyBlacklist)
 		.Process(this->AcademyStacks)
 		.Process(this->AcademyCap)
+		.Process(this->AcademyCapInfantry)
+		.Process(this->AcademyCapVehicle)
+		.Process(this->AcademyCapAircraft)
+		.Process(this->AcademyCapBuilding)
 		.Process(this->SpyInfantryLevel)
 		.Process(this->SpyVehicleLevel)
 		.Process(this->SpyNavalLevel)

@@ -54,11 +54,25 @@ contribution, or an applicable cap. This is what allows a cap to lower a rank.
 
 ```ini
 [SomeBuilding]
-Academy.Cap=1.0                 ; this building ceilings the final rank
+Academy.Cap=1.0                 ; ALL categories
+Academy.Cap.Infantry=           ; per-category override
+Academy.Cap.Vehicle=
+Academy.Cap.Aircraft=
+Academy.Cap.Building=
 
 [SomeCountry]
 AcademyBonus.Cap=1.0            ; this country ceilings the final rank
 ```
+
+> **⚠ The bare `Academy.Cap` applies to every category**, including ones the
+> building grants no bonus for. That is deliberate — a cap is a statement about
+> the *final* value, not about this building's contribution — but it surprises
+> people. An infantry-only academy with `Academy.Cap=1.0` will also stop a
+> spy-promoted **tank** from exceeding veteran. Measured in game: one such
+> academy capped 2403 vehicle, 138 aircraft and 2 building decisions.
+>
+> Use `Academy.Cap.Infantry=1.0` instead to scope it. A per-category tag always
+> wins over the bare form for that category.
 
 A cap is a ceiling on the **final** veterancy from *any* source — including spy
 effects, `VeteranBuildings` and Antares' own academy. When several apply, the

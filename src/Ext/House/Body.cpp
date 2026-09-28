@@ -133,14 +133,16 @@ void HouseExt::ExtData::ApplyAcademy(
 	bool hasCap = false;
 	double cap = 0.0;
 
-	auto const considerCap = [&hasCap, &cap](Nullable<double> const& candidate)
+	auto const considerCapValue = [&hasCap, &cap](double value)
 	{
-		if (!candidate.isset())
-			return;
-
-		double const value = candidate.Get(0.0);
 		cap = hasCap ? std::min(cap, value) : value;
 		hasCap = true;
+	};
+
+	auto const considerCap = [&considerCapValue](Nullable<double> const& candidate)
+	{
+		if (candidate.isset())
+			considerCapValue(candidate.Get(0.0));
 	};
 
 	// 1. Academy buildings this house owns.
@@ -159,7 +161,11 @@ void HouseExt::ExtData::ApplyAcademy(
 		if (value != 0.0)
 			resolver.Add(value, pExt->AcademyStacks);
 
-		considerCap(pExt->AcademyCap);
+		// Category-aware: a per-category Academy.Cap.<cat> wins over the bare
+		// all-categories Academy.Cap. Without the per-category form an
+		// infantry-only academy's cap also ceilings tanks and aircraft.
+		if (pExt->HasCap(category))
+			considerCapValue(pExt->GetCap(category));
 	}
 
 	// 2. Passive country bonus.
@@ -262,6 +268,13 @@ void HouseExt::ExtData::ApplyAcademy(
 		result = std::min(result, cap);
 
 	result = std::clamp(result, 0.0, veterancyCap);
+
+	// Nothing to change. Worth an early out rather than a redundant store: in the
+	// first authoritative in-game run 6324 of ~8000 writes were no-ops like this
+	// (the value we computed already matched what Antares had set), and each one
+	// logged a line that made the real decisions hard to find.
+	if (result == static_cast<double>(current))
+		return;
 
 	if (AcademyExtDLL::DebugLog)
 		Debug::Log("[AcademyExt]   -> wrote %.3f over %.3f (authoritative)\n",

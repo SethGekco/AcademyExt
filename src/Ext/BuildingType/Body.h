@@ -49,7 +49,20 @@ public:
 		// Only bites in authoritative mode -- capping means lowering, and
 		// raise-only cannot lower. Configuring one without
 		// [General] AcademyExt.Authoritative=yes is a silent no-op, so we warn.
+		//
+		// ⚠ The bare Academy.Cap applies to EVERY category, including ones this
+		// building grants no bonus for. That is deliberate (a cap is a statement
+		// about the final value, not about this building's contribution) but it
+		// surprises people: an infantry-only academy with Academy.Cap=1.0 will
+		// also stop a spy- or VeteranBuildings-promoted TANK from exceeding
+		// veteran. Observed in game capping 2403 vehicle / 138 aircraft / 2
+		// building decisions from an infantry-only academy. Use the per-category
+		// forms to scope it.
 		Nullable<double> AcademyCap;
+		Nullable<double> AcademyCapInfantry;
+		Nullable<double> AcademyCapVehicle;
+		Nullable<double> AcademyCapAircraft;
+		Nullable<double> AcademyCapBuilding;
 
 		// -- spy / infiltration magnitudes --
 		// Nullable so "unset" is distinguishable from "set to 0.0"; only a set
@@ -77,6 +90,10 @@ public:
 			, AcademyBlacklist {}
 			, AcademyStacks { false }
 			, AcademyCap {}
+			, AcademyCapInfantry {}
+			, AcademyCapVehicle {}
+			, AcademyCapAircraft {}
+			, AcademyCapBuilding {}
 			, SpyInfantryLevel {}
 			, SpyVehicleLevel {}
 			, SpyNavalLevel {}
@@ -100,10 +117,16 @@ public:
 		bool IsAcademy() const;
 
 		// Whether AcademyExt should track this building on its house's list.
-		// WIDER than IsAcademy() on purpose: a building that declares only
-		// Academy.Cap grants nothing but still has to be present for its ceiling
-		// to be applied. Antares' list gate stays IsAcademy(); this one is ours.
+		// WIDER than IsAcademy() on purpose: a building that declares only a cap
+		// grants nothing but still has to be present for its ceiling to be
+		// applied. Antares' list gate stays IsAcademy(); this one is ours.
 		bool IsTracked() const;
+
+		// Ceiling for one category: the per-category tag if set, else the bare
+		// Academy.Cap, else none.
+		bool HasCap(AcademyCategory category) const;
+		double GetCap(AcademyCategory category) const;
+		bool HasAnyCap() const;
 
 		// Academy bonus for one category. Naval has no academy counterpart and
 		// is not accepted here -- it is a spy-only branch.
@@ -123,6 +146,10 @@ public:
 		bool SpyAppliesTo(TechnoTypeClass* pType) const;
 
 	private:
+		// Resolves the per-category / all-categories cap precedence once, so
+		// HasCap and GetCap cannot disagree about which tag applies.
+		Nullable<double> const* CapFor(AcademyCategory category) const;
+
 		template <typename T>
 		void Serialize(T& Stm);
 	};
