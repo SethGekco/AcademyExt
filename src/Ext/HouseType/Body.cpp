@@ -22,6 +22,10 @@ void HouseTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 	this->AcademyBonusBuilding.Read(exINI, pID, "AcademyBonus.Building");
 	this->AcademyBonusStacks.Read(exINI, pID, "AcademyBonus.Stacks");
 	this->AcademyBonusCap.Read(exINI, pID, "AcademyBonus.Cap");
+	this->AcademyBonusCapInfantry.Read(exINI, pID, "AcademyBonus.Cap.Infantry");
+	this->AcademyBonusCapVehicle.Read(exINI, pID, "AcademyBonus.Cap.Vehicle");
+	this->AcademyBonusCapAircraft.Read(exINI, pID, "AcademyBonus.Cap.Aircraft");
+	this->AcademyBonusCapBuilding.Read(exINI, pID, "AcademyBonus.Cap.Building");
 	this->AcademyBonusWhitelist.Read(exINI, pID, "AcademyBonus.Types");
 	this->AcademyBonusBlacklist.Read(exINI, pID, "AcademyBonus.Ignore");
 
@@ -73,6 +77,48 @@ double HouseTypeExt::ExtData::GetBonus(AcademyCategory category) const
 	return this->AcademyBonus.Get(0.0);
 }
 
+bool HouseTypeExt::ExtData::HasAnyCap() const
+{
+	return this->AcademyBonusCap.isset()
+		|| this->AcademyBonusCapInfantry.isset()
+		|| this->AcademyBonusCapVehicle.isset()
+		|| this->AcademyBonusCapAircraft.isset()
+		|| this->AcademyBonusCapBuilding.isset();
+}
+
+// Per-category tag wins; the bare AcademyBonus.Cap is the all-categories
+// fallback. Mirrors BuildingTypeExt::CapFor so the two tag families behave
+// identically -- an inconsistency here would be its own trap.
+Nullable<double> const* HouseTypeExt::ExtData::CapFor(AcademyCategory category) const
+{
+	Nullable<double> const* pSpecific = nullptr;
+
+	switch (category)
+	{
+	case AcademyCategory::Infantry: pSpecific = &this->AcademyBonusCapInfantry; break;
+	case AcademyCategory::Vehicle:  pSpecific = &this->AcademyBonusCapVehicle;  break;
+	case AcademyCategory::Aircraft: pSpecific = &this->AcademyBonusCapAircraft; break;
+	case AcademyCategory::Building: pSpecific = &this->AcademyBonusCapBuilding; break;
+	default:                        return nullptr;
+	}
+
+	if (pSpecific->isset())
+		return pSpecific;
+
+	return this->AcademyBonusCap.isset() ? &this->AcademyBonusCap : nullptr;
+}
+
+bool HouseTypeExt::ExtData::HasCap(AcademyCategory category) const
+{
+	return this->CapFor(category) != nullptr;
+}
+
+double HouseTypeExt::ExtData::GetCap(AcademyCategory category) const
+{
+	auto const pCap = this->CapFor(category);
+	return pCap ? pCap->Get(0.0) : 0.0;
+}
+
 bool HouseTypeExt::ExtData::AppliesTo(TechnoTypeClass* pType) const
 {
 	bool const isWhitelisted = this->AcademyBonusWhitelist.empty()
@@ -96,6 +142,10 @@ void HouseTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AcademyBonusBuilding)
 		.Process(this->AcademyBonusStacks)
 		.Process(this->AcademyBonusCap)
+		.Process(this->AcademyBonusCapInfantry)
+		.Process(this->AcademyBonusCapVehicle)
+		.Process(this->AcademyBonusCapAircraft)
+		.Process(this->AcademyBonusCapBuilding)
 		.Process(this->AcademyBonusWhitelist)
 		.Process(this->AcademyBonusBlacklist)
 		;

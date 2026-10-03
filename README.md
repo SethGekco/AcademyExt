@@ -38,19 +38,22 @@ See [docs/INI-REFERENCE.md](docs/INI-REFERENCE.md) for the full tag list and
 **Feature-complete.** Academy stacking, the passive country bonus and
 configurable spy veterancy levels are all implemented and hooked. CI is green.
 
-### Verified in game
+### All five features verified in game
 
 | Feature | Result |
 |---|---|
-| **Stacking** | 0.5 academy: 1 building → no chevron, 2 → veteran, 4 → elite |
-| **Non-stacking vs the stack** | 1.0 academy + 1 stacking building → veteran (it competed); + 4 → elite (the stack overtook it) |
+| **Stacking** | `0.5` academy: 1 building → no chevron, 2 → veteran, 4 → elite |
+| **Non-stacking vs the stack** | `1.0` academy + 1 stacking building → veteran (it competed); + 4 → elite (the stack overtook it) |
+| **Passive country bonus** | stacking `0.5` shifts the whole curve by one building — veteran at 1 / elite at 3, vs 2 and 4 without it |
 | **Spy veterancy levels** | non-stacking `2.0` on infiltration → `bestSingle` 1.0→2.0, `stackSum` untouched → elite; 12 infiltrations, 12 recorded |
+| **Authoritative mode + caps** | `resolved=2.000, cap=1.000 → wrote 1.000` — a rank genuinely **lowered** |
 
 Antares reads the same `Academy.*Veterancy` tags and takes the `max`, so it
 resolved `0.5` throughout the stacking rows and cannot account for any of these.
 
-Not yet exercised in game: the passive country bonus, and authoritative mode /
-caps.
+> **Caveat on the last row:** the reduction was *invisible on screen* — `1.5` and
+> `1.0` both render as one chevron. It is only demonstrable from the decision log
+> (`AcademyExt.Debug=yes`). Any reducing effect here needs one.
 
 ## Building
 

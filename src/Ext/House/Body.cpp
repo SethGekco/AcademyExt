@@ -139,12 +139,6 @@ void HouseExt::ExtData::ApplyAcademy(
 		hasCap = true;
 	};
 
-	auto const considerCap = [&considerCapValue](Nullable<double> const& candidate)
-	{
-		if (candidate.isset())
-			considerCapValue(candidate.Get(0.0));
-	};
-
 	// 1. Academy buildings this house owns.
 	for (auto const& pBuilding : this->Academies)
 	{
@@ -178,7 +172,8 @@ void HouseExt::ExtData::ApplyAcademy(
 				if (pCountryExt->HasBonus(category))
 					resolver.Add(pCountryExt->GetBonus(category), pCountryExt->AcademyBonusStacks);
 
-				considerCap(pCountryExt->AcademyBonusCap);
+				if (pCountryExt->HasCap(category))
+					considerCapValue(pCountryExt->GetCap(category));
 			}
 		}
 	}

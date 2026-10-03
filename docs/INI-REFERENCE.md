@@ -61,7 +61,11 @@ Academy.Cap.Aircraft=
 Academy.Cap.Building=
 
 [SomeCountry]
-AcademyBonus.Cap=1.0            ; this country ceilings the final rank
+AcademyBonus.Cap=1.0            ; ALL categories
+AcademyBonus.Cap.Infantry=      ; per-category override
+AcademyBonus.Cap.Vehicle=
+AcademyBonus.Cap.Aircraft=
+AcademyBonus.Cap.Building=
 ```
 
 > **⚠ The bare `Academy.Cap` applies to every category**, including ones the
@@ -72,7 +76,8 @@ AcademyBonus.Cap=1.0            ; this country ceilings the final rank
 > academy capped 2403 vehicle, 138 aircraft and 2 building decisions.
 >
 > Use `Academy.Cap.Infantry=1.0` instead to scope it. A per-category tag always
-> wins over the bare form for that category.
+> wins over the bare form for that category. `AcademyBonus.Cap` on a country
+> behaves identically and has the same per-category forms.
 
 A cap is a ceiling on the **final** veterancy from *any* source — including spy
 effects, `VeteranBuildings` and Antares' own academy. When several apply, the

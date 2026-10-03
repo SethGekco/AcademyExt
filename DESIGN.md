@@ -8,10 +8,10 @@ bonus.
 - **Depends on:** Antares (co-loaded). **Never edits Antares.**
 - **Framework lineage:** YRpp / Syringe, Ares-lineage. Do not use Ares — see
   `antares-replaces-ares`.
-- **Status:** feature-complete, CI green, deployed. **Stacking verified in
-  game** (0.5-per-building academy: 1 → no chevron, 2 → veteran, 4 → elite,
-  which Antares' `max` could not produce). Remaining features implemented but
-  not yet exercised in game.
+- **Status:** feature-complete, CI green, deployed, and **all five features
+  verified in game** — academy stacking, non-stacking-vs-stack, the passive
+  country bonus, configurable spy levels, and authoritative-mode caps
+  (including a genuine *reduction*). See README for the result table.
 
 ---
 

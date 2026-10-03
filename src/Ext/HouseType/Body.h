@@ -39,8 +39,14 @@ public:
 		Valueable<bool> AcademyBonusStacks;
 
 		// Ceiling this country imposes on the FINAL veterancy, from any source.
-		// Same authoritative-mode caveat as BuildingTypeExt::AcademyCap.
+		// Same authoritative-mode caveat as BuildingTypeExt::AcademyCap, and the
+		// same category precedence: a per-category tag wins, the bare form is the
+		// all-categories fallback.
 		Nullable<double> AcademyBonusCap;
+		Nullable<double> AcademyBonusCapInfantry;
+		Nullable<double> AcademyBonusCapVehicle;
+		Nullable<double> AcademyBonusCapAircraft;
+		Nullable<double> AcademyBonusCapBuilding;
 
 		ValueableVector<TechnoTypeClass*> AcademyBonusWhitelist;
 		ValueableVector<TechnoTypeClass*> AcademyBonusBlacklist;
@@ -53,6 +59,10 @@ public:
 			, AcademyBonusBuilding {}
 			, AcademyBonusStacks { true }
 			, AcademyBonusCap {}
+			, AcademyBonusCapInfantry {}
+			, AcademyBonusCapVehicle {}
+			, AcademyBonusCapAircraft {}
+			, AcademyBonusCapBuilding {}
 			, AcademyBonusWhitelist {}
 			, AcademyBonusBlacklist {}
 		{ }
@@ -70,9 +80,18 @@ public:
 		double GetBonus(AcademyCategory category) const;
 		bool HasBonus(AcademyCategory category) const;
 
+		// Same precedence, for the ceiling.
+		bool HasCap(AcademyCategory category) const;
+		double GetCap(AcademyCategory category) const;
+		bool HasAnyCap() const;
+
 		bool AppliesTo(TechnoTypeClass* pType) const;
 
 	private:
+		// Resolves the per-category / all-categories precedence once, so HasCap
+		// and GetCap cannot disagree about which tag applies.
+		Nullable<double> const* CapFor(AcademyCategory category) const;
+
 		template <typename T>
 		void Serialize(T& Stm);
 	};
